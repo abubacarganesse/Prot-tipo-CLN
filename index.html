@@ -5,18 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nacala Logistics — Portal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-        
+
         :root {
             --bg: #0B1120;
             --card: #111827;
             --primary: #0057B8;
             --accent: #22C55E;
+            --danger: #EF4444;
             --text: #fff;
             --text-sec: #94A3B8;
+            --sidebar-w: 260px;
+            --sidebar-w-collapsed: 72px;
         }
-        
+
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
             font-family: 'Poppins', system-ui, sans-serif;
@@ -24,7 +28,7 @@
             color: var(--text);
             line-height: 1.6;
         }
-        
+
         header {
             position: fixed;
             top: 0; left: 0; right: 0;
@@ -33,7 +37,7 @@
             z-index: 1000;
             transition: all .3s;
         }
-        
+
         .nav {
             display: flex;
             align-items: center;
@@ -42,26 +46,26 @@
             max-width: 1480px;
             margin: 0 auto;
         }
-        
+
         .logo {
             font-size: 2rem;
             font-weight: 700;
             letter-spacing: -1px;
         }
         .logo span { color: var(--accent); }
-        
+
         .nav-links {
             display: flex;
             gap: 2.2rem;
             list-style: none;
         }
-        
+
         .nav-links a {
             color: var(--text-sec);
             text-decoration: none;
             font-weight: 500;
         }
-        
+
         .btn {
             padding: 11px 26px;
             border-radius: 9999px;
@@ -70,19 +74,19 @@
             transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
             border: none;
         }
-        
+
         .btn-primary {
             background: var(--primary);
             color: white;
         }
         .btn-primary:hover { background: #003d80; transform: translateY(-3px); }
-        
+
         .btn-outline {
             border: 2px solid var(--accent);
             color: var(--accent);
             background: transparent;
         }
-        
+
         /* HERO */
         .hero {
             height: 100vh;
@@ -91,31 +95,31 @@
             align-items: center;
             position: relative;
         }
-        
+
         .hero-content {
             max-width: 820px;
             padding-left: 5%;
         }
-        
+
         .hero h1 {
             font-size: clamp(3rem, 7vw, 5.2rem);
             line-height: 1.05;
             margin-bottom: 1.2rem;
         }
-        
+
         .hero p {
             font-size: 1.35rem;
             color: var(--text-sec);
             max-width: 520px;
             margin-bottom: 2.5rem;
         }
-        
+
         /* STATS */
         .stats {
             padding: 5rem 0;
             background: #0A0F1C;
         }
-        
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -124,7 +128,7 @@
             margin: 0 auto;
             padding: 0 5%;
         }
-        
+
         .stat-card {
             background: rgba(255,255,255,0.06);
             padding: 2.5rem 1.8rem;
@@ -133,45 +137,45 @@
             transition: transform .4s;
         }
         .stat-card:hover { transform: translateY(-12px); }
-        
+
         .stat-number {
             font-size: 3.4rem;
             font-weight: 700;
             color: var(--accent);
         }
-        
+
         /* SERVICES */
         .services {
             padding: 7rem 0;
             max-width: 1280px;
             margin: 0 auto;
         }
-        
+
         .section-title {
             text-align: center;
             font-size: 2.8rem;
             margin-bottom: 4rem;
         }
-        
+
         .services-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 2rem;
             padding: 0 5%;
         }
-        
+
         .service-card {
             background: var(--card);
             border-radius: 20px;
             padding: 2.8rem 2.2rem;
             transition: all .4s ease;
         }
-        
+
         .service-card:hover {
             transform: translateY(-20px);
             box-shadow: 0 25px 50px -12px rgb(0 87 184 / 25%);
         }
-        
+
         /* PORTAL */
         #portal {
             display: none;
@@ -180,7 +184,7 @@
             background: var(--bg);
             z-index: 9999;
         }
-        
+
         .login-container {
             width: 100%;
             max-width: 420px;
@@ -190,31 +194,44 @@
             border-radius: 24px;
             box-shadow: 0 30px 60px rgba(0,0,0,0.6);
         }
-        
+
         .dashboard {
             display: none;
             height: 100vh;
         }
 
-
-        
         .sidebar {
             position: fixed;
             left: 0;
             top: 0;
             bottom: 0;
-            width: 260px;
+            width: var(--sidebar-w);
             background: #0A0F1C;
             padding-top: 90px;
             transition: width .3s;
             z-index: 1100;
             overflow-y: auto;
+            overflow-x: hidden;
         }
-        
+
+        .nav-item {
+            color: var(--text-sec);
+            white-space: nowrap;
+        }
+        .nav-item i { width: 20px; text-align: center; flex-shrink: 0; }
+        .nav-item:hover {
+            background: rgba(255,255,255,0.06);
+            color: var(--text);
+        }
+        .nav-item.active {
+            background: var(--primary);
+            color: white;
+        }
+
         .top-nav {
             position: fixed;
             top: 0;
-            left: 500px;
+            left: var(--sidebar-w);
             right: 0;
             height: 78px;
             background: rgba(11,17,32,.97);
@@ -224,37 +241,52 @@
             padding: 0 2rem;
             justify-content: space-between;
             z-index: 1200;
+            transition: left .3s;
         }
-        
+
         .main-content {
-            margin-left: 260px;
+            margin-left: var(--sidebar-w);
             padding-top: 90px;
             height: 100vh;
             overflow-y: auto;
-            padding: 2rem;
+            padding: 90px 2rem 2rem;
+            transition: margin-left .3s;
         }
-        
+
         .card {
             background: var(--card);
             border-radius: 20px;
             padding: 2rem;
         }
-        
+
         table {
             width: 100%;
             border-collapse: collapse;
         }
-        
+
         th, td {
             padding: 16px 0;
             text-align: left;
             border-bottom: 1px solid #334155;
         }
-        
+
+        .chart-wrap {
+            position: relative;
+            height: 260px;
+        }
+
         @media (max-width: 1024px) {
-            .sidebar { width: 72px; }
-            .main-content { margin-left: 72px; }
+            :root { --sidebar-w: 72px; }
             .nav-links { display: none; }
+            .sidebar .nav-item span { display: none; }
+            .sidebar .nav-item { justify-content: center; }
+            .sidebar #global-search { display:none; }
+            #dashboard-screen .top-nav > div:first-child input#global-search { width: 200px; }
+        }
+
+        @media (max-width: 640px) {
+            #dashboard-screen .top-nav > div:first-child input#global-search { display:none; }
+            #dashboard-screen .top-nav span { display:none; }
         }
     </style>
 </head>
@@ -284,7 +316,7 @@
                 <button onclick="openPortal()" class="btn btn-primary" style="font-size:1.15rem;padding:18px 42px">Acessar Portal</button>
             </div>
         </div>
-        
+
         <div style="position:absolute;bottom:60px;left:50%;transform:translateX(-50%);animation:bounce 2s infinite;">
             <i class="fas fa-chevron-down fa-3x" style="opacity:0.5"></i>
         </div>
@@ -367,33 +399,33 @@
         <div id="dashboard-screen" class="dashboard">
             <div class="sidebar">
                 <div style="padding:0 1.5rem">
-                    <div onclick="switchView('dashboard')" class="nav-item active" style="padding:14px 18px;border-radius:12px;cursor:pointer;display:flex;align-items:center;gap:14px;margin-bottom:6px">
+                    <div class="nav-item active" data-view="dashboard" style="padding:14px 18px;border-radius:12px;cursor:pointer;display:flex;align-items:center;gap:14px;margin-bottom:6px">
                         <i class="fas fa-home"></i><span>Dashboard</span>
                     </div>
-                    <div onclick="switchView('tracking')" class="nav-item" style="padding:14px 18px;border-radius:12px;cursor:pointer;display:flex;align-items:center;gap:14px;margin-bottom:6px">
+                    <div class="nav-item" data-view="tracking" style="padding:14px 18px;border-radius:12px;cursor:pointer;display:flex;align-items:center;gap:14px;margin-bottom:6px">
                         <i class="fas fa-map-marker-alt"></i><span>Rastreamento</span>
                     </div>
-                    <div onclick="switchView('fleet')" class="nav-item" style="padding:14px 18px;border-radius:12px;cursor:pointer;display:flex;align-items:center;gap:14px;margin-bottom:6px">
+                    <div class="nav-item" data-view="fleet" style="padding:14px 18px;border-radius:12px;cursor:pointer;display:flex;align-items:center;gap:14px;margin-bottom:6px">
                         <i class="fas fa-truck"></i><span>Frota</span>
                     </div>
-                    <div onclick="switchView('reports')" class="nav-item" style="padding:14px 18px;border-radius:12px;cursor:pointer;display:flex;align-items:center;gap:14px">
+                    <div class="nav-item" data-view="reports" style="padding:14px 18px;border-radius:12px;cursor:pointer;display:flex;align-items:center;gap:14px">
                         <i class="fas fa-chart-bar"></i><span>Relatórios</span>
                     </div>
                 </div>
                 <div style="position:absolute;bottom:40px;left:24px;color:var(--danger);cursor:pointer" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i> Sair
+                    <i class="fas fa-sign-out-alt"></i> <span>Sair</span>
                 </div>
             </div>
 
             <div class="top-nav">
                 <div style="display:flex;align-items:center;gap:1rem">
-                    <input id="global-search" type="text" placeholder="Buscar rastreio..." style="background:#1F2937;padding:11px 20px;border-radius:9999px;width:380px;border:none;color:white" onkeypress="if(event.key==='Enter') searchGlobal()">
+                    <input id="global-search" type="text" placeholder="Buscar rastreio..." style="background:#1F2937;padding:11px 20px;border-radius:9999px;width:380px;max-width:100%;border:none;color:white" onkeypress="if(event.key==='Enter') searchGlobal()">
                 </div>
                 <div style="display:flex;align-items:center;gap:20px">
-                    <div id="clock" style="font-family:monospace;min-width:110px"></div>
+                    <div id="clock" style="font-family:monospace;min-width:70px"></div>
                     <i class="fas fa-bell" style="cursor:pointer;font-size:1.4rem" onclick="showNotifications()"></i>
                     <div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="showProfile()">
-                        <div style="width:38px;height:38px;background:var(--accent);border-radius:50%"></div>
+                        <div style="width:38px;height:38px;background:var(--accent);border-radius:50%;flex-shrink:0"></div>
                         <span>João Silva</span>
                     </div>
                 </div>
@@ -403,7 +435,7 @@
                 <!-- DASHBOARD VIEW -->
                 <div id="view-dashboard">
                     <h1 style="font-size:2.6rem;margin-bottom:2rem">Olá, João</h1>
-                    
+
                     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem">
                         <div class="card">
                             <p style="color:var(--text-sec)">Trens Ativos</p>
@@ -418,7 +450,7 @@
                             <div class="stat-number" data-target="64" style="font-size:3rem">0</div>
                         </div>
                     </div>
-                    
+
                     <div style="margin-top:3rem;display:grid;grid-template-columns:2fr 1fr;gap:2rem">
                         <div class="card">
                             <h3>Entregas Recentes</h3>
@@ -429,11 +461,13 @@
                         </div>
                         <div class="card">
                             <h3>Status da Frota</h3>
-                            <div style="height:260px;background:rgba(255,255,255,0.05);border-radius:16px;display:flex;align-items:center;justify-content:center;color:var(--text-sec)">Gráfico de utilização</div>
+                            <div class="chart-wrap">
+                                <canvas id="fleetChart"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- TRACKING VIEW -->
                 <div id="view-tracking" style="display:none">
                     <h1>Rastreamento de Carga</h1>
@@ -443,14 +477,105 @@
                     </div>
                     <div id="track-result" style="display:none"></div>
                 </div>
-                
+
                 <!-- Other views -->
                 <div id="view-fleet" style="display:none">
-                    <h1>Gestão de Frota</h1>
-                    <p style="color:var(--text-sec)">Lista de veículos (placeholder)</p>
+                    <h1 style="margin-bottom:2rem">Gestão de Frota</h1>
+
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem;margin-bottom:2rem">
+                        <div class="card">
+                            <p style="color:var(--text-sec)">Total de Veículos</p>
+                            <div class="stat-number" data-target="1638" style="font-size:2.6rem">0</div>
+                        </div>
+                        <div class="card">
+                            <p style="color:var(--text-sec)">Em Operação</p>
+                            <div class="stat-number" data-target="1204" style="font-size:2.6rem">0</div>
+                        </div>
+                        <div class="card">
+                            <p style="color:var(--text-sec)">Em Manutenção</p>
+                            <div class="stat-number" data-target="57" style="font-size:2.6rem">0</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap">
+                            <h3>Veículos</h3>
+                            <input id="fleet-search" type="text" placeholder="Filtrar por ID ou rota..." style="background:#1F2937;padding:10px 18px;border-radius:9999px;border:none;color:white;min-width:220px" oninput="filterFleet()">
+                        </div>
+                        <table>
+                            <thead>
+                                <tr style="color:var(--text-sec);font-weight:500">
+                                    <th>ID</th>
+                                    <th>Tipo</th>
+                                    <th>Rota Atual</th>
+                                    <th>Estado</th>
+                                    <th>Última Atualização</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fleet-table-body">
+                                <tr data-search="loc-118 nacala cuamba">
+                                    <td>LOC-118</td>
+                                    <td><i class="fas fa-train" style="color:var(--accent)"></i> Locomotiva</td>
+                                    <td>Nacala → Cuamba</td>
+                                    <td><span style="color:var(--accent)">Em Operação</span></td>
+                                    <td>há 4 min</td>
+                                </tr>
+                                <tr data-search="cmn-2231 beira nampula">
+                                    <td>CMN-2231</td>
+                                    <td><i class="fas fa-truck" style="color:var(--accent)"></i> Caminhão</td>
+                                    <td>Beira → Nampula</td>
+                                    <td><span style="color:var(--accent)">Em Operação</span></td>
+                                    <td>há 11 min</td>
+                                </tr>
+                                <tr data-search="loc-045 nampula maputo">
+                                    <td>LOC-045</td>
+                                    <td><i class="fas fa-train" style="color:var(--primary)"></i> Locomotiva</td>
+                                    <td>Nampula → Maputo</td>
+                                    <td><span style="color:#FBBF24">Atrasado</span></td>
+                                    <td>há 18 min</td>
+                                </tr>
+                                <tr data-search="cmn-0567 nacala pemba">
+                                    <td>CMN-0567</td>
+                                    <td><i class="fas fa-truck" style="color:var(--text-sec)"></i> Caminhão</td>
+                                    <td>Nacala → Pemba</td>
+                                    <td><span style="color:var(--danger)">Em Manutenção</span></td>
+                                    <td>há 2 h</td>
+                                </tr>
+                                <tr data-search="arm-003 nacala armazem central">
+                                    <td>ARM-003</td>
+                                    <td><i class="fas fa-warehouse" style="color:var(--accent)"></i> Armazém</td>
+                                    <td>Armazém Central — Nacala</td>
+                                    <td><span style="color:var(--accent)">Operacional</span></td>
+                                    <td>há 1 h</td>
+                                </tr>
+                                <tr data-search="cmn-1889 maputo nacala">
+                                    <td>CMN-1889</td>
+                                    <td><i class="fas fa-truck" style="color:var(--accent)"></i> Caminhão</td>
+                                    <td>Maputo → Nacala</td>
+                                    <td><span style="color:var(--accent)">Em Operação</span></td>
+                                    <td>há 26 min</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p id="fleet-empty" style="display:none;text-align:center;color:var(--text-sec);padding:2rem 0">Nenhum veículo encontrado.</p>
+                    </div>
                 </div>
                 <div id="view-reports" style="display:none">
-                    <h1>Relatórios Analíticos</h1>
+                    <h1 style="margin-bottom:2rem">Relatórios Analíticos</h1>
+                    <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:2rem;margin-bottom:2rem">
+                        <div class="card">
+                            <h3 style="margin-bottom:1rem">Cargas por Mês</h3>
+                            <div class="chart-wrap">
+                                <canvas id="reportsLineChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3 style="margin-bottom:1rem">Distribuição por Modal</h3>
+                            <div class="chart-wrap">
+                                <canvas id="reportsDoughnutChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
                     <button class="btn btn-primary">Exportar Relatório</button>
                 </div>
             </div>
@@ -464,7 +589,7 @@
             let start = 0;
             const duration = 1400;
             const startTime = performance.now();
-            
+
             function step(now) {
                 const elapsed = now - startTime;
                 const progress = Math.min(elapsed / duration, 1);
@@ -475,7 +600,7 @@
             }
             requestAnimationFrame(step);
         }
-        
+
         // Initialize counters when visible
         function initCounters() {
             const observer = new IntersectionObserver((entries) => {
@@ -488,12 +613,14 @@
             });
             observer.observe(document.querySelector('.stats'));
         }
-        
+
         function openPortal() {
             document.getElementById('portal').style.display = 'block';
             document.getElementById('login-screen').style.display = 'block';
         }
-        
+
+        let fleetChart, reportsLineChart, reportsDoughnutChart;
+
         function login() {
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('dashboard-screen').style.display = 'block';
@@ -501,31 +628,142 @@
             // Animate portal counters
             setTimeout(() => {
                 document.querySelectorAll('#dashboard-screen .stat-number').forEach(animateValue);
+                initCharts();
             }, 400);
         }
-        
+
         function logout() {
             document.getElementById('portal').style.display = 'none';
             document.getElementById('dashboard-screen').style.display = 'none';
             document.getElementById('login-screen').style.display = 'block';
         }
-        
+
         function startLiveClock() {
             const clock = document.getElementById('clock');
             setInterval(() => {
                 clock.textContent = new Date().toLocaleTimeString('pt-MZ', {hour:'2-digit', minute:'2-digit'});
             }, 1000);
         }
-        
+
         function switchView(view) {
             document.querySelectorAll('.main-content > div').forEach(div => div.style.display = 'none');
             document.getElementById(`view-${view}`).style.display = 'block';
+
+            document.querySelectorAll('.sidebar .nav-item[data-view]').forEach(item => {
+                item.classList.toggle('active', item.dataset.view === view);
+            });
+
+            if (view === 'reports') {
+                setTimeout(() => {
+                    if (reportsLineChart) reportsLineChart.resize();
+                    if (reportsDoughnutChart) reportsDoughnutChart.resize();
+                }, 0);
+            }
+
+            if (view === 'fleet' && !document.getElementById('view-fleet').dataset.animated) {
+                document.getElementById('view-fleet').dataset.animated = "1";
+                document.querySelectorAll('#view-fleet .stat-number').forEach(animateValue);
+            }
         }
-        
+
+        function filterFleet() {
+            const term = document.getElementById('fleet-search').value.trim().toLowerCase();
+            const rows = document.querySelectorAll('#fleet-table-body tr');
+            let visibleCount = 0;
+            rows.forEach(row => {
+                const match = row.getAttribute('data-search').includes(term);
+                row.style.display = match ? '' : 'none';
+                if (match) visibleCount++;
+            });
+            document.getElementById('fleet-empty').style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+
+        function initCharts() {
+            if (typeof Chart === 'undefined') return;
+
+            Chart.defaults.color = '#94A3B8';
+            Chart.defaults.font.family = "'Poppins', system-ui, sans-serif";
+
+            const fleetCtx = document.getElementById('fleetChart');
+            if (fleetCtx && !fleetChart) {
+                fleetChart = new Chart(fleetCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Trens', 'Caminhões', 'Armazéns'],
+                        datasets: [{
+                            label: 'Utilização (%)',
+                            data: [78, 64, 52],
+                            backgroundColor: ['#22C55E', '#0057B8', '#94A3B8'],
+                            borderRadius: 8,
+                            maxBarThickness: 46
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, max: 100, grid: { color: 'rgba(255,255,255,0.06)' } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+
+            const lineCtx = document.getElementById('reportsLineChart');
+            if (lineCtx && !reportsLineChart) {
+                reportsLineChart = new Chart(lineCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan','Fev','Mar','Abr','Mai','Jun','Jul'],
+                        datasets: [{
+                            label: 'Cargas',
+                            data: [8200, 9100, 8800, 10400, 11200, 11900, 12450],
+                            borderColor: '#22C55E',
+                            backgroundColor: 'rgba(34,197,94,0.15)',
+                            tension: 0.35,
+                            fill: true,
+                            pointBackgroundColor: '#22C55E'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { grid: { color: 'rgba(255,255,255,0.06)' } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+
+            const doughnutCtx = document.getElementById('reportsDoughnutChart');
+            if (doughnutCtx && !reportsDoughnutChart) {
+                reportsDoughnutChart = new Chart(doughnutCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Ferroviário', 'Rodoviário', 'Armazém'],
+                        datasets: [{
+                            data: [45, 38, 17],
+                            backgroundColor: ['#0057B8', '#22C55E', '#94A3B8'],
+                            borderColor: '#111827',
+                            borderWidth: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
+        }
+
         function trackShipment() {
             const input = document.getElementById('track-input').value || "NLP2026001";
             const result = document.getElementById('track-result');
-            
+
             result.innerHTML = `
                 <div class="card" style="max-width:780px;margin:0 auto">
                     <div style="display:flex;justify-content:space-between">
@@ -549,19 +787,19 @@
             `;
             result.style.display = 'block';
         }
-        
+
         function searchGlobal() {
             alert("Buscando por " + document.getElementById('global-search').value);
         }
-        
+
         function showNotifications() {
             alert("Notificações:\n• Carga NLP2026001 atualizada\n• Atraso de 18 min em rota Beira");
         }
-        
+
         function showProfile() {
             alert("Perfil: João Silva\nGerente de Logística");
         }
-        
+
         // Keyboard support
         document.addEventListener('keydown', e => {
             if (e.key === "/" && document.getElementById('portal').style.display === "block") {
@@ -569,13 +807,16 @@
                 e.preventDefault();
             }
         });
-        
+
         // Init
         window.onload = () => {
             initCounters();
-            console.log("%c✅ Protótipo Nacala Logistics carregado com sucesso!", "color:#22C55E;font-size:15px;font-weight:600");
+            document.querySelectorAll('.sidebar .nav-item[data-view]').forEach(item => {
+                item.addEventListener('click', () => switchView(item.dataset.view));
+            });
+            console.log("%c Protótipo Nacala Logistics carregado com sucesso!", "color:#22C55E;font-size:15px;font-weight:600");
         };
-        
+
         // Expose functions
         window.openPortal = openPortal;
         window.login = login;
